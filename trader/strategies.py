@@ -649,4 +649,13 @@ def get_strategy(name: str):
     except ImportError:
         pass
     
+    # Try adaptive strategies (from strategy inventory)
+    try:
+        from .adaptive_strategies import get_adaptive_strategy
+        adaptive = get_adaptive_strategy(name)
+        if adaptive:
+            return adaptive
+    except ImportError:
+        pass
+    
     return SMAStrategy()  # Default fallback

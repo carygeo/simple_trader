@@ -26,7 +26,13 @@ ADVANCED_STRATEGIES = [
     "momentum_breakout", "supertrend", "adx_trend", 
     "volatility_breakout", "triple_sma", "rsi_momentum"
 ]
-ALL_STRATEGIES = STRATEGIES + ADVANCED_STRATEGIES
+# Adaptive strategies from 68-strategy inventory
+ADAPTIVE_STRATEGIES = [
+    "mean_rev_bollinger", "momentum_divergence", "momentum_macd",
+    "mean_rev_zscore", "mean_rev_keltner", "momentum_roc",
+    "multi_tf_macd_rsi", "stoch_rsi"
+]
+ALL_STRATEGIES = STRATEGIES + ADVANCED_STRATEGIES + ADAPTIVE_STRATEGIES
 MODES = ["long_only", "leveraged"]
 TIMEFRAMES = {
     "1mo": 30,
