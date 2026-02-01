@@ -232,6 +232,57 @@ SMAStrategy(fast_period=20, slow_period=50)
 2026-02-01 05:04:15 | INFO | 🔸 DRY RUN - Would execute SHORT
 ```
 
+## 📊 Backtesting
+
+Run backtests to validate strategies before live trading:
+
+### Compare All Strategies
+
+```bash
+python -m trader.backtest --strategy all --days 30 --capital 100
+```
+
+Output:
+```
+         Strategy Return % vs Hold  Trades Win Rate  Max DD Sharpe
+        SMA_20/50  +22.69% +32.75%      16    40.0%  -4.57%   6.65
+             MACD   +3.15% +13.21%      57    25.0% -13.63%   1.16
+Combined_SMA_MACD  +12.82% +22.88%      69    27.9%  -6.58%   5.41
+```
+
+### Single Strategy with Plot
+
+```bash
+python -m trader.backtest --strategy sma --days 30 --plot
+python -m trader.backtest --strategy sma --save backtest.png
+```
+
+### Backtest Options
+
+```bash
+python -m trader.backtest [OPTIONS]
+
+Options:
+  --strategy TYPE   sma, macd, combined, or all (default: sma)
+  --pair SYMBOL     Trading pair (default: BTC-USD)
+  --days N          Days of history (default: 30)
+  --capital N       Initial capital (default: 100)
+  --plot            Show interactive plot
+  --save FILE       Save plot to file
+```
+
+### Backtest Metrics Explained
+
+| Metric | Description |
+|--------|-------------|
+| **Return %** | Total strategy return |
+| **vs Hold** | Outperformance vs buy & hold |
+| **Trades** | Number of trades executed |
+| **Win Rate** | Percentage of winning trades |
+| **Max DD** | Maximum drawdown (worst peak-to-trough) |
+| **Sharpe** | Risk-adjusted return (higher = better) |
+| **Profit Factor** | Gross profit / gross loss |
+
 ## 🔧 Troubleshooting
 
 ### "Missing API credentials"
