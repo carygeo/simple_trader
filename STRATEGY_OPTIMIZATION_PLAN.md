@@ -157,13 +157,65 @@ Examples:
 
 ---
 
+## 📊 Dashboard Integration (REQUIRED)
+
+### Mission Control Backtesting Page
+**URL:** https://mission-control-board.fly.dev/trade (Backtest tab)
+
+All optimization results MUST be synced to the dashboard:
+
+1. **Backtest Charts** - Generate PNG plots for each strategy tested
+   - Save to `backtest_results/[timeframe]/[ASSET]_[STRATEGY]_backtest.png`
+   - Include: price chart, signals, equity curve, key metrics
+
+2. **Summary CSV** - Update CSV with all backtest results
+   - `backtest_results/[timeframe]/backtest_summary_[timeframe].csv`
+   - Columns: asset, strategy, return_pct, hold_pct, trades, max_dd, sharpe
+
+3. **Sync to Dashboard** - Push data to Mission Control API
+   - Run: `python sync_to_mission_control.py`
+   - Endpoint: POST /api/trader with backtest data
+   - Include timeframe data (1mo, 6mo, 1yr)
+
+4. **Leaderboard Update** - Keep Top 5 strategies visible
+   - Dashboard shows best performers per timeframe
+   - Auto-updates when new results synced
+
+### Dashboard Data Requirements
+```json
+{
+  "backtests": {
+    "1mo": [...results...],
+    "6mo": [...results...],
+    "1yr": [...results...]
+  },
+  "leaderboard": {
+    "1mo": [top 5],
+    "6mo": [top 5],
+    "1yr": [top 5]
+  },
+  "charts": {
+    "available": ["ETH_SMA", "ETH_MACD", ...]
+  }
+}
+```
+
+### After Each Optimization Session:
+- [ ] Generate backtest plots for new strategies
+- [ ] Update summary CSVs
+- [ ] Run sync script to push to dashboard
+- [ ] Verify data appears on Mission Control
+
+---
+
 ## 📚 Reference Files
 
 - `OPTIMIZATION_RESULTS.md` - Detailed technical findings
 - `MORNING_BRIEFING.md` - Summary for Cary
 - `trader/strategies.py` - Implemented strategies
 - `strategy_optimizer.py` - Optimization scripts
+- `sync_to_mission_control.py` - Dashboard sync script
 
 ---
 
-*This document guides all autonomous optimization work. Update leaderboard when new leaders found.*
+*This document guides all autonomous optimization work. Update leaderboard when new leaders found. Keep dashboard current!*
