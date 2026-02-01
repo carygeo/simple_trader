@@ -205,6 +205,54 @@ All optimization results MUST be synced to the dashboard:
 - [ ] Update summary CSVs
 - [ ] Run sync script to push to dashboard
 - [ ] Verify data appears on Mission Control
+- [ ] **Git push all results to simple_trader repo**
+
+---
+
+## 🔄 GitHub Integration (REQUIRED)
+
+### Repository: github.com/carygeo/simple_trader
+
+All backtesting images and strategy code MUST be pushed to GitHub:
+
+```bash
+cd ~/clawd/simple_trader
+git add -A
+git commit -m "Add [STRATEGY] backtest results - [RETURN]% @ [LEVERAGE]x"
+git push origin main
+```
+
+### What to Commit:
+1. **Backtest Images** - All PNG plots in `backtest_results/`
+   - `backtest_results/1mo/*.png`
+   - `backtest_results/6mo/*.png`
+   - `backtest_results/1yr/*.png`
+
+2. **Summary CSVs** - Performance data
+   - `backtest_results/*/backtest_summary_*.csv`
+
+3. **Strategy Code** - New or modified strategies
+   - `trader/strategies.py`
+   - Any new strategy files
+
+4. **Documentation Updates**
+   - `OPTIMIZATION_RESULTS.md`
+   - `STRATEGY_OPTIMIZATION_PLAN.md` (leaderboard)
+   - `MORNING_BRIEFING.md`
+
+### Commit Message Format:
+```
+Add [STRATEGY] backtest: [ASSET] @ [LEVERAGE]x = [RETURN]% ([TRADES] trades)
+
+- Max drawdown: [DD]%
+- Sharpe ratio: [SHARPE]
+- Fees included: 0.2%/trade
+```
+
+### Push Frequency:
+- **After every optimization session** that finds improvements
+- **At minimum:** Once per hour if any new results generated
+- **Always push** before ending a work session
 
 ---
 
