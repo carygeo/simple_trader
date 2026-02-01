@@ -1,0 +1,8 @@
+{
+  "position": "NONE",
+  "entry_price": 0,
+  "trading_pair": "DOGE-USDT",
+  "strategy": "SMA_20/50",
+  "dry_run": false,
+  "updated_at": "2026-02-01T05:33:07.575955"
+}
