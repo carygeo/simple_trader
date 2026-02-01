@@ -142,6 +142,40 @@ backtest_results/1yr/backtest_summary_1yr.csv
 
 ---
 
+## 📊 Two Trading Modes (REQUIRED)
+
+All backtests must be run and stored in BOTH modes:
+
+### Mode 1: LONG ONLY
+- **Location:** `backtest_results/long_only/[timeframe]/`
+- **Rules:** Buy and hold only, no shorting, no leverage
+- **Use case:** Conservative, Coinbase-compatible
+- **Strategies:** SMA, MACD, BREAKOUT (1x)
+
+### Mode 2: LEVERAGED + SHORT  
+- **Location:** `backtest_results/leveraged/[timeframe]/`
+- **Rules:** Can go long AND short, with leverage (2x, 3x)
+- **Use case:** Aggressive, requires Kraken/Bybit
+- **Strategies:** SMA_3X_SHORT, BREAKOUT_3X_SHORT, MACD_3X_SHORT
+
+### Current Leaders by Mode:
+
+**LONG ONLY (1yr):**
+| Rank | Asset | Strategy | Return |
+|------|-------|----------|--------|
+| 1 | ETH | BREAKOUT | +57.5% |
+| 2 | LTC | SMA | +17.9% |
+
+**LEVERAGED + SHORT (1yr):**
+| Rank | Asset | Strategy | Return |
+|------|-------|----------|--------|
+| 1 | LTC | SMA_3X_SHORT | **+211.0%** 🏆 |
+| 2 | ETH | BREAKOUT_3X_SHORT | +146.3% |
+
+*Updated: 2026-02-01 09:09*
+
+---
+
 ## 🔄 Optimization Areas to Explore
 
 ### Phase 1: Breakout Variations (Current)
