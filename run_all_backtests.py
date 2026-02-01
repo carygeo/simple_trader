@@ -19,7 +19,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 from trader.backtest import Backtester
 
 ASSETS = ["BTC", "ETH", "DOGE", "XRP", "SOL", "ADA", "AVAX", "ATOM", "DOT", "LINK", "NEAR", "LTC"]
-STRATEGIES = ["sma", "macd", "combined", "breakout"]
+# Core strategies
+STRATEGIES = ["sma", "macd", "combined", "breakout", "ichimoku"]
+# Advanced strategies for higher profit targets
+ADVANCED_STRATEGIES = [
+    "momentum_breakout", "supertrend", "adx_trend", 
+    "volatility_breakout", "triple_sma", "rsi_momentum"
+]
+ALL_STRATEGIES = STRATEGIES + ADVANCED_STRATEGIES
 MODES = ["long_only", "leveraged"]
 TIMEFRAMES = {
     "1mo": 30,
@@ -54,7 +61,7 @@ def run_all_backtests(initial_capital: float = 91.0, mode: str = "long_only"):
                 bt = Backtester(symbol=symbol, initial_capital=initial_capital, mode=mode)
                 bt.fetch_data(days=days)
                 
-                for strategy in STRATEGIES:
+                for strategy in ALL_STRATEGIES:
                     try:
                         result = bt.run(strategy)
                         
