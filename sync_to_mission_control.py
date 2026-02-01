@@ -79,17 +79,40 @@ def get_prices() -> dict:
         return {}
 
 
-def load_backtest_results() -> list:
-    """Load backtest results"""
-    csv_path = os.path.join(os.path.dirname(__file__), "asset_strategy_scan.csv")
-    try:
-        if os.path.exists(csv_path):
-            df = pd.read_csv(csv_path)
-            df = df.sort_values('return_pct', ascending=False)
-            return df.to_dict('records')
-    except:
-        pass
-    return []
+def load_backtest_results() -> dict:
+    """Load backtest results for all timeframes"""
+    base_dir = os.path.dirname(__file__)
+    backtest_dir = os.path.join(base_dir, "backtest_results")
+    
+    results = {}
+    timeframes = ["1mo", "6mo", "1yr"]
+    
+    col_map = {
+        'strategy_return_pct': 'return_pct',
+        'hold_return_pct': 'hold_pct',
+        'outperformance_pct': 'outperform',
+        'total_trades': 'trades',
+        'max_drawdown_pct': 'max_dd'
+    }
+    
+    for tf in timeframes:
+        tf_dir = os.path.join(backtest_dir, tf)
+        csv_path = os.path.join(tf_dir, f"backtest_summary_{tf}.csv")
+        
+        try:
+            if os.path.exists(csv_path):
+                df = pd.read_csv(csv_path)
+                df = df.rename(columns=col_map)
+                df = df.sort_values('return_pct', ascending=False)
+                results[tf] = df.to_dict('records')
+            else:
+                results[tf] = []
+        except Exception as e:
+            print(f"Warning: Could not load {tf} CSV: {e}")
+            results[tf] = []
+    
+    # Also return default (1mo) as 'strategies' for backward compatibility
+    return results
 
 
 def load_trade_history() -> list:
@@ -124,7 +147,7 @@ def sync_to_mission_control():
     running = is_trader_running()
     balances = get_balances()
     prices = get_prices()
-    strategies = load_backtest_results()
+    backtest_results = load_backtest_results()
     trades = load_trade_history()
     state = load_trader_state()
     
@@ -136,7 +159,7 @@ def sync_to_mission_control():
         elif currency in prices:
             portfolio_value += amount * prices[currency]
     
-    # Build payload
+    # Build payload with all timeframes
     payload = {
         "running": running,
         "portfolioValue": portfolio_value,
@@ -145,7 +168,10 @@ def sync_to_mission_control():
         "entryPrice": state.get("entry_price", 0),
         "balances": balances,
         "prices": prices,
-        "strategies": strategies[:20],  # Top 20
+        "strategies": backtest_results.get("1mo", [])[:20],  # Default for backward compat
+        "strategies_1mo": backtest_results.get("1mo", []),
+        "strategies_6mo": backtest_results.get("6mo", []),
+        "strategies_1yr": backtest_results.get("1yr", []),
         "trades": trades[-50:]  # Last 50
     }
     
