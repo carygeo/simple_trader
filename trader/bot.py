@@ -167,6 +167,32 @@ class SimpleTrader:
             "dry_run": dry_run
         }
         self.trades.append(trade)
+        
+        # Save state and trade history for dashboard
+        self._save_state()
+        self._save_trade_history()
+    
+    def _save_state(self):
+        """Save current state for dashboard"""
+        import json
+        state = {
+            "position": self.current_position.name if self.current_position else "NONE",
+            "entry_price": self.entry_price or 0,
+            "trading_pair": self.trading_pair,
+            "strategy": self.strategy.name,
+            "dry_run": self.dry_run,
+            "updated_at": datetime.now().isoformat()
+        }
+        state_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "trader_state.json")
+        with open(state_path, 'w') as f:
+            json.dump(state, f, indent=2)
+    
+    def _save_trade_history(self):
+        """Save trade history for dashboard"""
+        import json
+        history_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "trade_history.json")
+        with open(history_path, 'w') as f:
+            json.dump(self.trades[-100:], f, indent=2)  # Keep last 100 trades
     
     def analyze(self) -> Optional[TradeSignal]:
         """Analyze market and return signal"""
