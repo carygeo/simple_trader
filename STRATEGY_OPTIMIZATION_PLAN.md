@@ -147,9 +147,43 @@ Examples:
 
 ---
 
-## 🚨 Alert Conditions
+## 📱 Telegram Updates (REQUIRED)
 
-**Immediately notify Cary via Telegram if:**
+### Continuous Updates to Cary
+After EVERY optimization session, send a Telegram update with findings:
+
+**Update Format:**
+```
+📈 Strategy Update - [TIME]
+
+🔬 Tested: [STRATEGY] on [ASSET]
+📊 Result: [RETURN]% @ [LEVERAGE]x
+📉 Drawdown: [DD]%
+🔄 Trades: [COUNT]
+
+[VERDICT: Better/Worse/Similar to current leader]
+
+Current Leader: 30-day Breakout @ 3x = +133%
+```
+
+### When to Send Updates:
+- ✅ **Every hour** after optimization session completes
+- ✅ **Immediately** if >150% strategy found
+- ✅ **Immediately** if new leaderboard entry
+- ✅ **Summary** at end of day with best findings
+
+### Alert Levels:
+| Finding | Action |
+|---------|--------|
+| <100% return | Brief update, no alert |
+| 100-150% return | Update + "Promising" flag |
+| 150-200% return | Update + "Strong candidate" |
+| >200% return | 🚨 IMMEDIATE ALERT |
+| Works on 3+ assets | 🚨 IMMEDIATE ALERT |
+
+## 🚨 Critical Alert Conditions
+
+**Send URGENT Telegram notification if:**
 - Strategy found with >200% return after fees
 - Strategy works on 3+ assets with >100% each
 - Major insight about market behavior
