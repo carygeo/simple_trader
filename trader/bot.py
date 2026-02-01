@@ -193,6 +193,53 @@ class SimpleTrader:
         history_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "trade_history.json")
         with open(history_path, 'w') as f:
             json.dump(self.trades[-100:], f, indent=2)  # Keep last 100 trades
+        
+        # Push to Mission Control for realtime updates
+        self._push_to_mission_control()
+    
+    def _push_to_mission_control(self):
+        """Push realtime update to Mission Control"""
+        import requests
+        try:
+            url = "https://mission-control-board.fly.dev/api/trade"
+            secret = os.getenv("MISSION_CONTROL_SECRET", "abel-mission-2026")
+            
+            # Get current balances
+            balances = self.get_balances()
+            
+            # Calculate portfolio value
+            portfolio_value = 0
+            for currency, amount in balances.items():
+                if currency in ["USD", "USDT", "USDC"]:
+                    portfolio_value += amount
+                # Note: would need prices for other currencies
+            
+            payload = {
+                "running": True,
+                "portfolioValue": portfolio_value,
+                "position": self.current_position.name if self.current_position else "NONE",
+                "tradingPair": self.trading_pair,
+                "entryPrice": self.entry_price or 0,
+                "balances": balances,
+                "trades": self.trades[-50:]
+            }
+            
+            response = requests.post(
+                url,
+                json=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Status-Secret": secret
+                },
+                timeout=10
+            )
+            
+            if response.ok:
+                logger.info("📡 Pushed update to Mission Control")
+            else:
+                logger.warning(f"Failed to push to Mission Control: {response.status_code}")
+        except Exception as e:
+            logger.warning(f"Could not push to Mission Control: {e}")
     
     def analyze(self) -> Optional[TradeSignal]:
         """Analyze market and return signal"""
