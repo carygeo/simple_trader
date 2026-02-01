@@ -97,11 +97,48 @@ Verdict: [PASS/FAIL/PROMISING]
 
 | Rank | Strategy | Asset | Leverage | Return | Drawdown | Trades |
 |------|----------|-------|----------|--------|----------|--------|
-| 1 | 30-day Breakout | ETH | 3x | +133% | -58% | 6 |
-| 2 | 30-day Breakout | ETH | 2x | +104% | -44% | 6 |
-| 3 | 30-day Breakout | ETH | 1x | +56% | -27% | 6 |
+| 1 | BREAKOUT_3X | ETH | 3x | +133% | -58% | 6 |
+| 2 | SMA | LTC | 1x | +18% | -20% | ~50 |
+| 3 | SMA | LINK | 1x | +16% | -33% | ~45 |
+| 4 | SMA | ETH | 1x | +8% | -40% | ~50 |
+| 5 | SMA | BTC | 1x | +0.5% | -24% | ~45 |
 
-*Updated: 2026-02-01 07:00*
+*Updated: 2026-02-01 09:05*
+
+---
+
+## 🔄 Continuous Comparison (CRITICAL)
+
+### NEVER Delete Old Data
+- All strategies tested must be APPENDED to records
+- Keep historical comparisons for reference
+- Build comprehensive database over time
+
+### Comparison Requirements
+After EVERY optimization session:
+1. Load existing CSV with all past results
+2. Run new strategy tests
+3. APPEND new results (don't overwrite)
+4. Re-rank all strategies together
+5. Report how new strategies compare to historical bests
+
+### Tracking Format
+Each CSV should grow over time:
+```
+backtest_results/1yr/backtest_summary_1yr.csv
+- Contains: ALL strategies ever tested
+- Columns: asset, strategy, params, return, drawdown, trades, date_tested
+- Never truncate, only append
+```
+
+### Hourly Comparison Report
+```
+📊 New vs Historical:
+- Tested: [NEW_STRATEGY]
+- Result: +XX%
+- Rank: #X of Y total strategies tested
+- Beats: [LIST] / Loses to: [LIST]
+```
 
 ---
 
