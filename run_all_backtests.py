@@ -2,6 +2,10 @@
 """
 Run backtests for all assets, strategies, and timeframes.
 Generates plots and CSV summary for Mission Control.
+
+Modes:
+- long_only: Only take long positions (go to cash when bearish)
+- leveraged: Long + Short positions (profit from both up and down moves)
 """
 
 import os
@@ -15,25 +19,28 @@ sys.path.insert(0, os.path.dirname(__file__))
 from trader.backtest import Backtester
 
 ASSETS = ["BTC", "ETH", "DOGE", "XRP", "SOL", "ADA", "AVAX", "ATOM", "DOT", "LINK", "NEAR", "LTC"]
-STRATEGIES = ["sma", "macd", "combined"]
+STRATEGIES = ["sma", "macd", "combined", "breakout"]
+MODES = ["long_only", "leveraged"]
 TIMEFRAMES = {
     "1mo": 30,
     "6mo": 180,
     "1yr": 365
 }
 
-def run_all_backtests(initial_capital: float = 91.0):
-    """Run backtests for all combinations"""
+def run_all_backtests(initial_capital: float = 91.0, mode: str = "long_only"):
+    """Run backtests for all combinations in specified mode"""
     
     base_dir = os.path.dirname(__file__)
     results_dir = os.path.join(base_dir, "backtest_results")
     
+    mode_label = "📈 Long Only" if mode == "long_only" else "📉 Leveraged Short"
+    
     for tf_name, days in TIMEFRAMES.items():
         print(f"\n{'='*60}")
-        print(f"📊 Running {tf_name} ({days} days) backtests...")
+        print(f"📊 Running {tf_name} ({days} days) backtests - {mode_label}")
         print(f"{'='*60}")
         
-        # Create timeframe directory
+        # Create timeframe directory (include mode in path)
         tf_dir = os.path.join(results_dir, tf_name)
         os.makedirs(tf_dir, exist_ok=True)
         
@@ -44,14 +51,14 @@ def run_all_backtests(initial_capital: float = 91.0):
             print(f"\n🔄 {asset}...")
             
             try:
-                bt = Backtester(symbol=symbol, initial_capital=initial_capital)
+                bt = Backtester(symbol=symbol, initial_capital=initial_capital, mode=mode)
                 bt.fetch_data(days=days)
                 
                 for strategy in STRATEGIES:
                     try:
                         result = bt.run(strategy)
                         
-                        # Save plot
+                        # Save plot with mode-aware naming
                         plot_file = os.path.join(tf_dir, f"{asset}_{strategy.upper()}_backtest.png")
                         bt.plot(save_path=plot_file, show=False)
                         
@@ -59,6 +66,7 @@ def run_all_backtests(initial_capital: float = 91.0):
                         all_results.append({
                             "asset": asset,
                             "strategy": strategy.upper(),
+                            "mode": mode,
                             "start_date": result.start_date,
                             "end_date": result.end_date,
                             "trading_days": days,
@@ -99,7 +107,7 @@ def run_all_backtests(initial_capital: float = 91.0):
             df.to_csv(main_csv, index=False)
 
 
-def run_single_timeframe(tf_name: str, initial_capital: float = 91.0):
+def run_single_timeframe(tf_name: str, initial_capital: float = 91.0, mode: str = "long_only"):
     """Run backtests for a single timeframe"""
     if tf_name not in TIMEFRAMES:
         print(f"Unknown timeframe: {tf_name}. Use: {list(TIMEFRAMES.keys())}")
@@ -111,7 +119,8 @@ def run_single_timeframe(tf_name: str, initial_capital: float = 91.0):
     tf_dir = os.path.join(results_dir, tf_name)
     os.makedirs(tf_dir, exist_ok=True)
     
-    print(f"📊 Running {tf_name} ({days} days) backtests...")
+    mode_label = "📈 Long Only" if mode == "long_only" else "📉 Leveraged Short"
+    print(f"📊 Running {tf_name} ({days} days) backtests - {mode_label}")
     
     all_results = []
     
@@ -120,7 +129,7 @@ def run_single_timeframe(tf_name: str, initial_capital: float = 91.0):
         print(f"\n🔄 {asset}...")
         
         try:
-            bt = Backtester(symbol=symbol, initial_capital=initial_capital)
+            bt = Backtester(symbol=symbol, initial_capital=initial_capital, mode=mode)
             bt.fetch_data(days=days)
             
             for strategy in STRATEGIES:
@@ -134,6 +143,7 @@ def run_single_timeframe(tf_name: str, initial_capital: float = 91.0):
                     all_results.append({
                         "asset": asset,
                         "strategy": strategy.upper(),
+                        "mode": mode,
                         "start_date": result.start_date,
                         "end_date": result.end_date,
                         "trading_days": days,
@@ -176,10 +186,19 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--timeframe", "-t", choices=["1mo", "6mo", "1yr", "all"], default="all")
+    parser.add_argument("--mode", "-m", choices=["long_only", "leveraged", "both"], default="long_only",
+                       help="long_only (default), leveraged, or both")
     parser.add_argument("--capital", type=float, default=91.0)
     args = parser.parse_args()
     
-    if args.timeframe == "all":
-        run_all_backtests(args.capital)
-    else:
-        run_single_timeframe(args.timeframe, args.capital)
+    modes_to_run = ["long_only", "leveraged"] if args.mode == "both" else [args.mode]
+    
+    for mode in modes_to_run:
+        print(f"\n{'#'*60}")
+        print(f"# MODE: {mode.upper()}")
+        print(f"{'#'*60}")
+        
+        if args.timeframe == "all":
+            run_all_backtests(args.capital, mode=mode)
+        else:
+            run_single_timeframe(args.timeframe, args.capital, mode=mode)

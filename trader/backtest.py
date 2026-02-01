@@ -76,12 +76,17 @@ class Backtester:
     def __init__(
         self,
         symbol: str = "BTC-USD",
-        initial_capital: float = 1000.0
+        initial_capital: float = 1000.0,
+        mode: str = "long_only",  # "long_only" or "leveraged"
+        leverage: float = 1.0  # Leverage multiplier (1.0 = no leverage, 3.0 = 3x)
     ):
         self.symbol = symbol
         self.initial_capital = initial_capital
+        self.mode = mode  # "long_only" = only long positions, "leveraged" = long + short
+        self.leverage = leverage if mode == "leveraged" else 1.0  # Only apply leverage in leveraged mode
         self.df: Optional[pd.DataFrame] = None
         self.trades: list = []
+        self.last_strategy_name: str = ""
     
     def fetch_data(self, days: int = 30, interval: str = "1h") -> pd.DataFrame:
         """Fetch historical price data"""
@@ -122,12 +127,21 @@ class Backtester:
         
         print(f"🔄 Running backtest: {strategy.name}...")
         
+        # Store strategy name for plotting
+        self.last_strategy_name = strategy.name
+        
         # Calculate signals for entire period
         signals = []
         for i in range(60, len(df)):
             window = df.iloc[:i+1].copy()
             signal = strategy.analyze(window)
-            signals.append(signal.signal.value)
+            sig_value = signal.signal.value
+            
+            # Long Only mode: convert SHORT (-1) to NEUTRAL (0)
+            if self.mode == "long_only" and sig_value == -1:
+                sig_value = 0
+            
+            signals.append(sig_value)
         
         # Pad beginning with neutral
         signals = [0] * 60 + signals
@@ -136,9 +150,9 @@ class Backtester:
         # Detect trades (signal changes)
         df['trade'] = df['signal'].diff().fillna(0)
         
-        # Calculate returns
+        # Calculate returns (apply leverage multiplier)
         df['returns'] = df['close'].pct_change()
-        df['strategy_returns'] = df['signal'].shift(1) * df['returns']
+        df['strategy_returns'] = df['signal'].shift(1) * df['returns'] * self.leverage
         
         # Calculate cumulative returns
         df['cum_returns'] = (1 + df['returns']).cumprod()
@@ -221,8 +235,16 @@ class Backtester:
         
         df = self.results_df
         
+        # Build descriptive title with mode and leverage
+        if self.mode == "long_only":
+            mode_label = "[Long Only]"
+        else:
+            mode_label = f"[Leveraged {self.leverage:.0f}x Short]" if self.leverage > 1 else "[Leveraged Short]"
+        asset = self.symbol.replace("-USD", "")
+        strategy_name = self.last_strategy_name.replace("_", " ").title()
+        
         fig, axes = plt.subplots(3, 1, figsize=(14, 12))
-        fig.suptitle(f'Backtest Results: {self.symbol}', fontsize=16, fontweight='bold')
+        fig.suptitle(f'{asset} - {strategy_name} ({mode_label})', fontsize=16, fontweight='bold')
         
         # Plot 1: Price with Buy/Sell signals
         ax1 = axes[0]
