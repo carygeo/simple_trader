@@ -658,4 +658,13 @@ def get_strategy(name: str):
     except ImportError:
         pass
     
+    # Try high ROI strategies
+    try:
+        from .high_roi_strategies import get_high_roi_strategy
+        high_roi = get_high_roi_strategy(name)
+        if high_roi:
+            return high_roi
+    except ImportError:
+        pass
+    
     return SMAStrategy()  # Default fallback
