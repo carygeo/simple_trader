@@ -166,6 +166,9 @@ def sync_to_mission_control():
         "position": state.get("position", "NONE"),
         "tradingPair": state.get("trading_pair", "BTC-USDT"),
         "entryPrice": state.get("entry_price", 0),
+        "activeStrategy": state.get("strategy", "NONE"),  # Currently deployed strategy
+        "lastUpdated": state.get("updated_at", ""),
+        "dryRun": state.get("dry_run", True),
         "balances": balances,
         "prices": prices,
         "strategies": backtest_results.get("1mo", [])[:20],  # Default for backward compat
