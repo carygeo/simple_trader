@@ -667,4 +667,13 @@ def get_strategy(name: str):
     except ImportError:
         pass
     
+    # Try low-frequency strategies
+    try:
+        from .lowfreq_strategies import get_lowfreq_strategy
+        lowfreq = get_lowfreq_strategy(name)
+        if lowfreq:
+            return lowfreq
+    except ImportError:
+        pass
+    
     return SMAStrategy()  # Default fallback
