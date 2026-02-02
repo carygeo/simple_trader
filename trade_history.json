@@ -7,5 +7,14 @@
     "reason": "Downtrend: SMA20 < SMA50",
     "confidence": 0.6,
     "dry_run": false
+  },
+  {
+    "timestamp": "2026-02-02T10:06:57.070665",
+    "signal": "LONG",
+    "price": 0.10771126300096512,
+    "strategy": "SMA_20/50",
+    "reason": "Bullish crossover: SMA20 crossed above SMA50",
+    "confidence": 0.8,
+    "dry_run": false
   }
 ]
