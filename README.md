@@ -1,321 +1,185 @@
-# Simple Trader 🤖📈
+# Simple Trader
 
-A straightforward cryptocurrency trading bot using Coinbase Advanced Trade API with proven technical analysis strategies.
+Automated cryptocurrency trading bot with backtested strategies for Coinbase (long-only) and Kraken (leveraged/short).
 
-## 📊 Backtest Results (30 Days)
+## 🏆 Best Performing Strategy
 
-| Strategy | Return | vs Buy & Hold | Trades | Win Rate |
-|----------|--------|---------------|--------|----------|
-| **SMA Crossover** | **+16.1%** | +28.7% | 16 | 50% |
-| MACD | +5.1% | +17.7% | 57 | 47% |
-| Combined | +10.8% | +23.4% | 70 | 23% |
-| Buy & Hold | -12.6% | baseline | - | - |
+**SMA 20/50 Crossover with Daily Candles**
 
-> **Key insight:** All strategies outperformed buy & hold by **17-28%** during the recent market downturn by shorting during declines.
+| Asset | Return (1yr) | Trades | Leverage |
+|-------|--------------|--------|----------|
+| LTC | **+231%** | 3 | 3x |
+| LINK | **+221%** | 5 | 3x |
+| ETH | +44% | 5 | 3x |
 
-## ✨ Features
-
-- **3 Trading Strategies** - SMA Crossover, MACD, and Combined
-- **Long/Short Capable** - Profits in both bull and bear markets
-- **Dry Run Mode** - Test strategies without risking real money
-- **Live Trading** - Execute real trades via Coinbase API
-- **Configurable** - Adjust pairs, amounts, intervals, strategies
-- **Logging** - Detailed trade logs and analysis
-
-## 🚀 Quick Start
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/carygeo/simple_trader.git
-cd simple_trader
-```
-
-### 2. Set Up Python Environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# or
-.venv\Scripts\activate     # Windows
-
-pip install -r requirements.txt
-```
-
-### 3. Configure API Credentials
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your Coinbase API credentials:
-
-```bash
-COINBASE_API_KEY_NAME=organizations/YOUR-ORG-ID/apiKeys/YOUR-KEY-ID
-COINBASE_API_KEY_SECRET=-----BEGIN EC PRIVATE KEY-----\nYOUR-PRIVATE-KEY\n-----END EC PRIVATE KEY-----
-```
-
-**Getting API Keys:**
-1. Go to [Coinbase Developer Platform](https://portal.cdp.coinbase.com)
-2. Create a new API key with trading permissions
-3. Copy the key name and private key
-
-### 4. Run the Bot
-
-```bash
-# Dry run (safe - no real trades)
-python run.py
-
-# Single analysis (test once)
-python run.py --once
-
-# Live trading ⚠️
-python run.py --live
-```
-
-## 📖 Usage
-
-### Command Line Options
-
-```bash
-python run.py [OPTIONS]
-
-Options:
-  --live              Enable live trading (default: dry run)
-  --once              Run single analysis, don't loop
-  --strategy TYPE     Strategy: sma, macd, combined (default: sma)
-  --pair PAIR         Trading pair (default: BTC-USDT)
-  --amount USD        Trade amount in USD (default: 10)
-  --interval MINS     Check interval in minutes (default: 5)
-```
-
-### Examples
-
-```bash
-# Dry run with SMA strategy on BTC
-python run.py
-
-# Live trading with MACD on ETH
-python run.py --live --strategy macd --pair ETH-USDT
-
-# Test combined strategy once
-python run.py --once --strategy combined
-
-# Trade $50 every 15 minutes
-python run.py --live --amount 50 --interval 15
-```
-
-## 📈 Strategies Explained
-
-### 1. SMA Crossover (Recommended) ⭐
-
-**How it works:**
-- Calculates 20-period and 50-period Simple Moving Averages
-- **BUY signal:** SMA20 crosses above SMA50 (bullish crossover)
-- **SELL signal:** SMA20 crosses below SMA50 (bearish crossover)
-
-**Why it's best:**
-- Fewest trades (16 in 30 days) = lower fees
-- Highest returns (+16.1%)
-- Catches major trends, ignores noise
-
-```
-Price ━━━━━━━━━━━━━━━━━
-SMA20 ┄┄┄┄┄┄┄╱╲╱┄┄┄┄┄┄┄
-SMA50 ─────╱────╲──────
-         ↑BUY   ↑SELL
-```
-
-### 2. MACD (Moving Average Convergence Divergence)
-
-**How it works:**
-- MACD Line = EMA12 - EMA26
-- Signal Line = 9-period EMA of MACD
-- **BUY signal:** MACD crosses above Signal line
-- **SELL signal:** MACD crosses below Signal line
-
-**Characteristics:**
-- More responsive to price changes
-- More trades (57 in 30 days)
-- Good for volatile markets
-
-### 3. Combined Strategy
-
-**How it works:**
-- Combines SMA and MACD signals
-- Only trades when both agree (or stay neutral)
-- Higher confidence but fewer opportunities
-
-**Characteristics:**
-- Reduces false signals
-- More conservative approach
-- Best for uncertain markets
-
-## 🏗️ Architecture
-
-```
-simple_trader/
-├── run.py              # Entry point & CLI
-├── trader/
-│   ├── __init__.py     # Package init
-│   ├── bot.py          # Main trading logic
-│   ├── coinbase.py     # Coinbase API client
-│   └── strategies.py   # Trading strategies
-├── .env                # Your credentials (git-ignored)
-├── .env.example        # Template
-├── requirements.txt    # Dependencies
-└── README.md           # This file
-```
-
-### Flow Diagram
-
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Fetch Data │────▶│   Analyze    │────▶│  Generate   │
-│  (yfinance) │     │ (Indicators) │     │   Signal    │
-└─────────────┘     └──────────────┘     └──────┬──────┘
-                                                │
-                    ┌──────────────┐     ┌──────▼──────┐
-                    │   Execute    │◀────│   Decide    │
-                    │    Trade     │     │  (if change)│
-                    └──────────────┘     └─────────────┘
-```
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `COINBASE_API_KEY_NAME` | API key identifier | Required |
-| `COINBASE_API_KEY_SECRET` | Private key (PEM format) | Required |
-
-### Strategy Parameters
-
-Edit `trader/strategies.py` to customize:
-
-```python
-# SMA periods
-SMAStrategy(fast_period=20, slow_period=50)
-
-# MACD uses standard 12/26/9
-```
-
-## 🛡️ Risk Management
-
-### Built-in Safety Features
-
-1. **Dry Run Mode** - Default mode, no real trades
-2. **Position Tracking** - Won't double-buy or double-sell
-3. **Logging** - All decisions logged for review
-
-### Recommended Practices
-
-1. **Start with dry run** - Test for at least 24 hours
-2. **Small amounts first** - Start with $10-20
-3. **Monitor regularly** - Check logs daily
-4. **Set loss limits** - Don't risk more than you can lose
-
-## 📝 Sample Output
-
-```
-2026-02-01 05:04:12 | INFO | 🤖 SimpleTrader initialized
-2026-02-01 05:04:12 | INFO |    Strategy: SMA_20/50
-2026-02-01 05:04:12 | INFO |    Pair: BTC-USDT
-2026-02-01 05:04:12 | INFO |    Trade size: $10.0
-2026-02-01 05:04:12 | INFO |    Mode: DRY RUN
-2026-02-01 05:04:12 | INFO | ==================================================
-2026-02-01 05:04:12 | INFO | 🔍 Analyzing BTC-USDT...
-2026-02-01 05:04:12 | INFO | 💰 Balances: {'USDT': 91.23}
-2026-02-01 05:04:15 | INFO | 📊 Signal: SHORT | Downtrend: SMA20 < SMA50
-2026-02-01 05:04:15 | INFO |    Confidence: 60% | Price: $78,985.15
-2026-02-01 05:04:15 | INFO | 🔸 DRY RUN - Would execute SHORT
-```
-
-## 📊 Backtesting
-
-Run backtests to validate strategies before live trading:
-
-### Compare All Strategies
-
-```bash
-python -m trader.backtest --strategy all --days 30 --capital 100
-```
-
-Output:
-```
-         Strategy Return % vs Hold  Trades Win Rate  Max DD Sharpe
-        SMA_20/50  +22.69% +32.75%      16    40.0%  -4.57%   6.65
-             MACD   +3.15% +13.21%      57    25.0% -13.63%   1.16
-Combined_SMA_MACD  +12.82% +22.88%      69    27.9%  -6.58%   5.41
-```
-
-### Single Strategy with Plot
-
-```bash
-python -m trader.backtest --strategy sma --days 30 --plot
-python -m trader.backtest --strategy sma --save backtest.png
-```
-
-### Backtest Options
-
-```bash
-python -m trader.backtest [OPTIONS]
-
-Options:
-  --strategy TYPE   sma, macd, combined, or all (default: sma)
-  --pair SYMBOL     Trading pair (default: BTC-USD)
-  --days N          Days of history (default: 30)
-  --capital N       Initial capital (default: 100)
-  --plot            Show interactive plot
-  --save FILE       Save plot to file
-```
-
-### Backtest Metrics Explained
-
-| Metric | Description |
-|--------|-------------|
-| **Return %** | Total strategy return |
-| **vs Hold** | Outperformance vs buy & hold |
-| **Trades** | Number of trades executed |
-| **Win Rate** | Percentage of winning trades |
-| **Max DD** | Maximum drawdown (worst peak-to-trough) |
-| **Sharpe** | Risk-adjusted return (higher = better) |
-| **Profit Factor** | Gross profit / gross loss |
-
-## 🔧 Troubleshooting
-
-### "Missing API credentials"
-- Ensure `.env` file exists and has correct format
-- Check that newlines in private key use `\n`
-
-### "Insufficient data for analysis"
-- Requires at least 60 hours of price data
-- Wait or reduce the SMA periods
-
-### "API Error 401: Unauthorized"
-- Check API key permissions
-- Ensure key has trading access enabled
-
-## ⚠️ Disclaimer
-
-**Trading cryptocurrencies involves significant risk of loss.**
-
-- This software is for educational purposes only
-- Past performance does not guarantee future results
-- Never invest more than you can afford to lose
-- The authors are not responsible for any financial losses
-
-Always do your own research before trading.
-
-## 📜 License
-
-MIT License - See LICENSE file
-
-## 🙏 Credits
-
-Built by Abel 🦞 for Cary
+See: [CROSSOVER_STRATEGIES.md](CROSSOVER_STRATEGIES.md)
 
 ---
 
-**Happy Trading!** 🚀📈
+## 📁 Project Structure
+
+```
+simple_trader/
+├── trader/
+│   ├── strategies.py           # Original SMA/MACD/Breakout strategies
+│   ├── crossover_strategies.py # ✅ WINNING crossover-only strategies
+│   ├── enhanced_strategies.py  # Experimental (didn't work)
+│   ├── backtest.py             # Backtesting engine
+│   ├── coinbase.py             # Coinbase API client
+│   ├── kraken.py               # Kraken API client
+│   └── kraken_strategy.py      # Kraken trading bot
+│
+├── backtest_results/
+│   ├── long_only/              # Coinbase-compatible results
+│   ├── leveraged/              # Kraken-compatible results
+│   ├── enhanced/               # Failed v1 experiments
+│   └── improved_v2/            # Failed v2 experiments
+│
+├── docs/
+│   ├── ORIGINAL_STRATEGIES.md  # Original strategy documentation
+│   └── ENHANCED_STRATEGIES.md  # What we learned from failures
+│
+├── CROSSOVER_STRATEGIES.md     # ✅ WINNING strategy documentation
+├── STRATEGY_OPTIMIZATION_PLAN.md # Optimization roadmap
+└── README.md                   # This file
+```
+
+---
+
+## 🎯 Strategy Overview
+
+### What Works ✅
+
+| Strategy | File | Best For |
+|----------|------|----------|
+| SMA 20/50 Crossover | `crossover_strategies.py` | 1-year swing trading |
+| SMA 50/200 Trend | `crossover_strategies.py` | Long-term (2+ years) |
+
+### What Doesn't Work ❌
+
+| Strategy | Issue |
+|----------|-------|
+| Continuous SMA | Too many trades (800+/year) |
+| Enhanced v1 | Added complexity, worse results |
+| Enhanced v2 | Still wrong base signals |
+
+---
+
+## 🔑 Key Insights
+
+### 1. Daily Candles > Hourly
+- Hourly: 8,729 candles → 832 trades → -100%
+- Daily: 366 candles → 3 trades → +231%
+
+### 2. Crossover-Only > Continuous
+- Continuous signals: Trade every candle in trend
+- Crossover-only: Trade ONLY on actual SMA crosses
+
+### 3. Simple > Complex
+The winning strategy is just:
+```python
+if sma_20 crosses above sma_50: LONG
+if sma_20 crosses below sma_50: SHORT
+else: HOLD
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
+```bash
+cd simple_trader
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Configure API Keys
+```bash
+cp .env.example .env
+# Edit .env with your Coinbase/Kraken API keys
+```
+
+### 3. Run Backtest
+```python
+from trader.backtest import Backtester
+from trader.crossover_strategies import SMA2050CrossoverStrategy
+
+bt = Backtester(symbol='LTC-USD', initial_capital=100, mode='leveraged', leverage=3.0)
+bt.fetch_data(days=365, interval='1d')  # Daily candles!
+
+strategy = SMA2050CrossoverStrategy()
+# Run manual backtest with crossover logic
+```
+
+### 4. Live Trading (Kraken)
+```python
+from trader.kraken_strategy import KrakenLeveragedTrader
+
+trader = KrakenLeveragedTrader(
+    pairs=['LTC-USD'],
+    leverage=3,
+    dry_run=True  # Set False for real trades
+)
+trader.run()
+```
+
+---
+
+## 📊 Exchanges
+
+### Coinbase (Long Only)
+- Spot trading only
+- No leverage, no shorting
+- Use `mode='long_only'` in backtests
+
+### Kraken (Leveraged + Short)
+- Margin trading enabled
+- Up to 5x leverage
+- Can profit from both directions
+- Use `mode='leveraged'` in backtests
+
+---
+
+## 📈 Mission Control Integration
+
+Results sync to: https://mission-control-board.fly.dev/trade
+
+```bash
+python sync_to_mission_control.py
+```
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [CROSSOVER_STRATEGIES.md](CROSSOVER_STRATEGIES.md) | ✅ Winning strategies |
+| [docs/ORIGINAL_STRATEGIES.md](docs/ORIGINAL_STRATEGIES.md) | Original implementations |
+| [docs/ENHANCED_STRATEGIES.md](docs/ENHANCED_STRATEGIES.md) | Failed experiments & lessons |
+| [STRATEGY_OPTIMIZATION_PLAN.md](STRATEGY_OPTIMIZATION_PLAN.md) | Optimization roadmap |
+
+---
+
+## ⚠️ Risk Warning
+
+- Cryptocurrency trading involves significant risk
+- Past performance does not guarantee future results
+- Max drawdowns of 50-70% are possible
+- Only trade with capital you can afford to lose
+- This is experimental software - use at your own risk
+
+---
+
+## 📝 Version History
+
+| Date | Version | Changes |
+|------|---------|---------|
+| 2026-02-07 | 2.0 | Added crossover-only strategies (+231% LTC) |
+| 2026-02-01 | 1.0 | Initial release with SMA/MACD/Breakout |
+
+---
+
+*Built by Abel for Cary's trading experiments*
