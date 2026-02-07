@@ -286,24 +286,36 @@ def sync_to_mission_control():
                 "balances": {"USDT": kraken_balance}
             }
         ],
-        # Legacy fields for backward compatibility
+        # Coinbase bot (Long Only)
         "coinbase": {
+            "name": "Long Only Bot",
             "running": is_bot_running("coinbase_bot"),
             "portfolioValue": portfolio_value,
             "position": load_bot_state("coinbase_bot").get("position", state.get("position", "NONE")),
             "tradingPair": load_bot_state("coinbase_bot").get("trading_pair", state.get("trading_pair", "DOGE-USDT")),
             "entryPrice": load_bot_state("coinbase_bot").get("entry_price", state.get("entry_price", 0)),
             "strategy": load_bot_state("coinbase_bot").get("strategy", state.get("strategy", "SMA_20/50")),
-            "balances": balances
+            "mode": "long_only",
+            "leverage": 1,
+            "balances": balances,
+            "lastSignal": load_bot_state("coinbase_bot").get("last_signal"),
+            "updatedAt": load_bot_state("coinbase_bot").get("updated_at")
         },
+        # Kraken bot (Leveraged + Short)
         "kraken": {
+            "name": "Leveraged Short Bot",
             "running": is_bot_running("kraken_bot"),
             "portfolioValue": kraken_balance,
             "position": load_bot_state("kraken_bot").get("position", kraken_position),
             "tradingPair": load_bot_state("kraken_bot").get("trading_pair", "LTC-USD"),
+            "entryPrice": load_bot_state("kraken_bot").get("entry_price", 0),
             "strategy": load_bot_state("kraken_bot").get("strategy", "SMA_3X_SHORT"),
+            "mode": "leveraged",
             "leverage": load_bot_state("kraken_bot").get("leverage", 3),
-            "balances": {"USDT": kraken_balance}
+            "unrealizedPnl": load_bot_state("kraken_bot").get("unrealized_pnl", 0),
+            "balances": {"USDT": kraken_balance},
+            "lastSignal": load_bot_state("kraken_bot").get("last_signal"),
+            "updatedAt": load_bot_state("kraken_bot").get("updated_at")
         }
     }
     
