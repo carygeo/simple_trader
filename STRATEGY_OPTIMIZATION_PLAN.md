@@ -372,3 +372,43 @@ Add [STRATEGY] backtest: [ASSET] @ [LEVERAGE]x = [RETURN]% ([TRADES] trades)
 ---
 
 *This document guides all autonomous optimization work. Update leaderboard when new leaders found. Keep dashboard current!*
+
+---
+
+## 🔬 Enhancement Ideas (Feb 7, 2026 - from Cary's research)
+
+### Confirmed Improvements to Test:
+
+1. **RSI + MACD Confirmation**
+   - Only enter on SMA cross when RSI and MACD align
+   - RSI: Avoid longs >70, shorts <30
+   - MACD: Confirm momentum direction
+
+2. **2% Risk Rule**
+   - Max 2% portfolio risk per trade
+   - Position size = (Portfolio * 0.02) / Stop distance
+
+3. **Re-test Entry Strategy**
+   - Don't enter immediately on SMA cross
+   - Wait for price to pull back and re-test the MA
+   - Enter only if MA acts as support/resistance
+
+4. **Slope Filter**
+   - Calculate SMA slope over last N periods
+   - Only trade when slope > threshold (trending)
+   - Skip flat SMA (ranging market)
+
+5. **Volume Confirmation**
+   - Require above-average volume on breakouts
+   - Filter out low-conviction moves
+
+6. **Multi-Timeframe Analysis**
+   - Use daily SMA for trend direction
+   - Use hourly for entry timing
+   - Only trade in direction of higher timeframe
+
+### Sources:
+- Schwab, Investopedia, TradingSim
+- 2% rule from Investopedia
+- Moving average best practices
+
