@@ -1,8 +1,8 @@
 {
   "position": "SHORT",
-  "entry_price": 0.10603135824203491,
+  "entry_price": 0.10838644206523895,
   "trading_pair": "DOGE-USDT",
   "strategy": "SMA_20/50",
   "dry_run": false,
-  "updated_at": "2026-02-02T10:06:57.070761"
+  "updated_at": "2026-02-06T22:03:07.049648"
 }

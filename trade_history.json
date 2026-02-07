@@ -16,5 +16,23 @@
     "reason": "Bullish crossover: SMA20 crossed above SMA50",
     "confidence": 0.8,
     "dry_run": false
+  },
+  {
+    "timestamp": "2026-02-04T04:02:50.145447",
+    "signal": "SHORT",
+    "price": 0.10838644206523895,
+    "strategy": "SMA_20/50",
+    "reason": "Bearish crossover: SMA20 crossed below SMA50",
+    "confidence": 0.8,
+    "dry_run": false
+  },
+  {
+    "timestamp": "2026-02-06T22:03:07.048155",
+    "signal": "LONG",
+    "price": 0.09794030338525772,
+    "strategy": "SMA_20/50",
+    "reason": "Bullish crossover: SMA20 crossed above SMA50",
+    "confidence": 0.8,
+    "dry_run": false
   }
 ]
