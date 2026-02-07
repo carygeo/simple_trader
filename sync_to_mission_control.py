@@ -80,12 +80,13 @@ def get_prices() -> dict:
 
 
 def load_backtest_results() -> dict:
-    """Load backtest results for all timeframes"""
+    """Load backtest results for all timeframes and modes"""
     base_dir = os.path.dirname(__file__)
     backtest_dir = os.path.join(base_dir, "backtest_results")
     
     results = {}
     timeframes = ["1mo", "6mo", "1yr"]
+    modes = ["long_only", "leveraged"]
     
     col_map = {
         'strategy_return_pct': 'return_pct',
@@ -95,6 +96,7 @@ def load_backtest_results() -> dict:
         'max_drawdown_pct': 'max_dd'
     }
     
+    # Load by timeframe (legacy)
     for tf in timeframes:
         tf_dir = os.path.join(backtest_dir, tf)
         csv_path = os.path.join(tf_dir, f"backtest_summary_{tf}.csv")
@@ -111,7 +113,29 @@ def load_backtest_results() -> dict:
             print(f"Warning: Could not load {tf} CSV: {e}")
             results[tf] = []
     
-    # Also return default (1mo) as 'strategies' for backward compatibility
+    # Load by mode (new structure)
+    for mode in modes:
+        for tf in timeframes:
+            key = f"{mode}_{tf}"
+            mode_dir = os.path.join(backtest_dir, mode, tf)
+            csv_path = os.path.join(mode_dir, "summary.csv")
+            
+            try:
+                if os.path.exists(csv_path):
+                    df = pd.read_csv(csv_path)
+                    df = df.rename(columns=col_map)
+                    df = df.sort_values('return_pct', ascending=False)
+                    # Add mode to each record
+                    records = df.to_dict('records')
+                    for r in records:
+                        r['mode'] = mode
+                    results[key] = records
+                else:
+                    results[key] = []
+            except Exception as e:
+                print(f"Warning: Could not load {key} CSV: {e}")
+                results[key] = []
+    
     return results
 
 
@@ -192,11 +216,18 @@ def sync_to_mission_control():
         "dryRun": state.get("dry_run", True),
         "balances": balances,
         "prices": prices,
-        "strategies": backtest_results.get("1mo", [])[:20],
-        "strategies_1mo": backtest_results.get("1mo", []),
-        "strategies_6mo": backtest_results.get("6mo", []),
-        "strategies_1yr": backtest_results.get("1yr", []),
-        "trades": trades[-50:],
+        "strategies": backtest_results.get("1mo", [])[:10],
+        "strategies_1mo": backtest_results.get("1mo", [])[:15],
+        "strategies_6mo": backtest_results.get("6mo", [])[:15],
+        "strategies_1yr": backtest_results.get("1yr", [])[:15],
+        # Mode-specific strategies (top 10 each)
+        "long_only_1yr": backtest_results.get("long_only_1yr", [])[:10],
+        "long_only_6mo": backtest_results.get("long_only_6mo", [])[:10],
+        "long_only_1mo": backtest_results.get("long_only_1mo", [])[:10],
+        "leveraged_1yr": backtest_results.get("leveraged_1yr", [])[:10],
+        "leveraged_6mo": backtest_results.get("leveraged_6mo", [])[:10],
+        "leveraged_1mo": backtest_results.get("leveraged_1mo", [])[:10],
+        "trades": trades[-20:],
         # Dual exchange data
         "coinbase": {
             "running": running,
