@@ -1,0 +1,33 @@
+# Kraken Bot Configuration
+# Mode: Leveraged + Short (margin trading)
+
+exchange: kraken
+mode: leveraged
+name: "Leveraged Short Bot"
+
+strategy:
+  name: sma_3x_short
+  params:
+    fast_period: 20
+    slow_period: 50
+    leverage: 3
+
+trading:
+  pairs:
+    - LTC-USD
+  trade_amount_usd: 50
+  max_position_pct: 0.5
+  leverage: 3
+  allow_short: true
+
+risk:
+  stop_loss_pct: 0.10
+  take_profit_pct: 0.20
+  max_drawdown_pct: 0.40
+
+# Set to false for live trading
+dry_run: true
+
+# Logging
+log_level: INFO
+log_file: logs/trader.log

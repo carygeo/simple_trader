@@ -1,0 +1,30 @@
+# Coinbase Bot Configuration
+# Mode: Long Only (spot trading)
+
+exchange: coinbase
+mode: long_only
+name: "Long Only Bot"
+
+strategy:
+  name: sma_crossover
+  params:
+    fast_period: 20
+    slow_period: 50
+
+trading:
+  pairs:
+    - DOGE-USDT
+  trade_amount_usd: 50
+  max_position_pct: 0.5
+
+risk:
+  stop_loss_pct: 0.05
+  take_profit_pct: 0.10
+  max_drawdown_pct: 0.20
+
+# Set to false for live trading
+dry_run: true
+
+# Logging
+log_level: INFO
+log_file: logs/trader.log

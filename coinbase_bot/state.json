@@ -1,0 +1,10 @@
+{
+  "position": "NONE",
+  "entry_price": 0,
+  "quantity": 0,
+  "last_signal": null,
+  "trading_pair": "DOGE-USDT",
+  "strategy": "SMA_20/50",
+  "trades": [],
+  "updated_at": "2026-02-07T13:10:00Z"
+}

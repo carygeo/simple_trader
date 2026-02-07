@@ -152,7 +152,7 @@ def load_trade_history() -> list:
 
 
 def load_trader_state() -> dict:
-    """Load trader state"""
+    """Load trader state (legacy)"""
     state_path = os.path.join(os.path.dirname(__file__), "trader_state.json")
     try:
         if os.path.exists(state_path):
@@ -161,6 +161,31 @@ def load_trader_state() -> dict:
     except:
         pass
     return {}
+
+
+def load_bot_state(bot_name: str) -> dict:
+    """Load state for a specific bot"""
+    base_dir = os.path.dirname(__file__)
+    state_path = os.path.join(base_dir, bot_name, "state.json")
+    try:
+        if os.path.exists(state_path):
+            with open(state_path) as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load {bot_name} state: {e}")
+    return {}
+
+
+def is_bot_running(bot_name: str) -> bool:
+    """Check if a specific bot process is running"""
+    try:
+        result = subprocess.run(
+            ["pgrep", "-f", f"python.*{bot_name}/run.py"],
+            capture_output=True, text=True
+        )
+        return bool(result.stdout.strip())
+    except:
+        return False
 
 
 def sync_to_mission_control():
@@ -228,23 +253,56 @@ def sync_to_mission_control():
         "leveraged_6mo": backtest_results.get("leveraged_6mo", [])[:10],
         "leveraged_1mo": backtest_results.get("leveraged_1mo", [])[:10],
         "trades": trades[-20:],
-        # Dual exchange data
+        # Load individual bot states
+        "coinbase_bot": load_bot_state("coinbase_bot"),
+        "kraken_bot": load_bot_state("kraken_bot"),
+        # Dual exchange data (formatted for dashboard)
+        "bots": [
+            {
+                "name": "Long Only",
+                "exchange": "coinbase",
+                "running": is_bot_running("coinbase_bot"),
+                "portfolioValue": portfolio_value,
+                "position": load_bot_state("coinbase_bot").get("position", state.get("position", "NONE")),
+                "tradingPair": load_bot_state("coinbase_bot").get("trading_pair", state.get("trading_pair", "DOGE-USDT")),
+                "entryPrice": load_bot_state("coinbase_bot").get("entry_price", state.get("entry_price", 0)),
+                "strategy": load_bot_state("coinbase_bot").get("strategy", state.get("strategy", "SMA_20/50")),
+                "mode": "long_only",
+                "leverage": 1,
+                "balances": balances
+            },
+            {
+                "name": "Leveraged Short",
+                "exchange": "kraken",
+                "running": is_bot_running("kraken_bot"),
+                "portfolioValue": kraken_balance,
+                "position": load_bot_state("kraken_bot").get("position", kraken_position),
+                "tradingPair": load_bot_state("kraken_bot").get("trading_pair", "LTC-USD"),
+                "entryPrice": load_bot_state("kraken_bot").get("entry_price", 0),
+                "strategy": load_bot_state("kraken_bot").get("strategy", "SMA_3X_SHORT"),
+                "mode": "leveraged",
+                "leverage": load_bot_state("kraken_bot").get("leverage", 3),
+                "unrealizedPnl": load_bot_state("kraken_bot").get("unrealized_pnl", 0),
+                "balances": {"USDT": kraken_balance}
+            }
+        ],
+        # Legacy fields for backward compatibility
         "coinbase": {
-            "running": running,
+            "running": is_bot_running("coinbase_bot"),
             "portfolioValue": portfolio_value,
-            "position": state.get("position", "NONE"),
-            "tradingPair": state.get("trading_pair", "DOGE-USDT"),
-            "entryPrice": state.get("entry_price", 0),
-            "strategy": state.get("strategy", "SMA_20/50"),
+            "position": load_bot_state("coinbase_bot").get("position", state.get("position", "NONE")),
+            "tradingPair": load_bot_state("coinbase_bot").get("trading_pair", state.get("trading_pair", "DOGE-USDT")),
+            "entryPrice": load_bot_state("coinbase_bot").get("entry_price", state.get("entry_price", 0)),
+            "strategy": load_bot_state("coinbase_bot").get("strategy", state.get("strategy", "SMA_20/50")),
             "balances": balances
         },
         "kraken": {
-            "running": kraken_balance > 0,
+            "running": is_bot_running("kraken_bot"),
             "portfolioValue": kraken_balance,
-            "position": kraken_position,
-            "tradingPair": "LTC-USD",
-            "strategy": "SMA_20_50_CROSSOVER",
-            "leverage": 3,
+            "position": load_bot_state("kraken_bot").get("position", kraken_position),
+            "tradingPair": load_bot_state("kraken_bot").get("trading_pair", "LTC-USD"),
+            "strategy": load_bot_state("kraken_bot").get("strategy", "SMA_3X_SHORT"),
+            "leverage": load_bot_state("kraken_bot").get("leverage", 3),
             "balances": {"USDT": kraken_balance}
         }
     }

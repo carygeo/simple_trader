@@ -1,0 +1,12 @@
+{
+  "position": "SHORT",
+  "entry_price": 98.50,
+  "quantity": 1.5,
+  "leverage": 3,
+  "last_signal": "SHORT",
+  "trading_pair": "LTC-USD",
+  "strategy": "SMA_3X_SHORT",
+  "unrealized_pnl": 15.20,
+  "trades": [],
+  "updated_at": "2026-02-07T13:10:00Z"
+}
