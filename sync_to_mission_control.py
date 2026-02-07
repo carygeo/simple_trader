@@ -159,23 +159,63 @@ def sync_to_mission_control():
         elif currency in prices:
             portfolio_value += amount * prices[currency]
     
+    # Get Kraken balance
+    kraken_balance = 0
+    kraken_position = "NONE"
+    try:
+        from trader.kraken import KrakenClient
+        kraken_client = KrakenClient()
+        kraken_balances = kraken_client.get_balance()
+        for currency, amount in kraken_balances.items():
+            val = float(amount)
+            if val > 0.01:
+                if currency in ["USDT", "USD", "ZUSD"]:
+                    kraken_balance += val
+        # Load Kraken state if exists
+        kraken_state_path = os.path.join(os.path.dirname(__file__), "kraken_state.json")
+        if os.path.exists(kraken_state_path):
+            with open(kraken_state_path) as f:
+                kraken_state = json.load(f)
+                kraken_position = kraken_state.get("position", "NONE")
+    except Exception as e:
+        print(f"Note: Kraken balance check: {e}")
+    
     # Build payload with all timeframes
     payload = {
         "running": running,
-        "portfolioValue": portfolio_value,
+        "portfolioValue": portfolio_value + kraken_balance,
         "position": state.get("position", "NONE"),
         "tradingPair": state.get("trading_pair", "BTC-USDT"),
         "entryPrice": state.get("entry_price", 0),
-        "activeStrategy": state.get("strategy", "NONE"),  # Currently deployed strategy
+        "activeStrategy": state.get("strategy", "NONE"),
         "lastUpdated": state.get("updated_at", ""),
         "dryRun": state.get("dry_run", True),
         "balances": balances,
         "prices": prices,
-        "strategies": backtest_results.get("1mo", [])[:20],  # Default for backward compat
+        "strategies": backtest_results.get("1mo", [])[:20],
         "strategies_1mo": backtest_results.get("1mo", []),
         "strategies_6mo": backtest_results.get("6mo", []),
         "strategies_1yr": backtest_results.get("1yr", []),
-        "trades": trades[-50:]  # Last 50
+        "trades": trades[-50:],
+        # Dual exchange data
+        "coinbase": {
+            "running": running,
+            "portfolioValue": portfolio_value,
+            "position": state.get("position", "NONE"),
+            "tradingPair": state.get("trading_pair", "DOGE-USDT"),
+            "entryPrice": state.get("entry_price", 0),
+            "strategy": state.get("strategy", "SMA_20/50"),
+            "balances": balances
+        },
+        "kraken": {
+            "running": kraken_balance > 0,
+            "portfolioValue": kraken_balance,
+            "position": kraken_position,
+            "tradingPair": "LTC-USD",
+            "strategy": "SMA_20_50_CROSSOVER",
+            "leverage": 3,
+            "balances": {"USDT": kraken_balance}
+        }
     }
     
     # Send to Mission Control
