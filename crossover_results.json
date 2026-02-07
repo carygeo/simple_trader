@@ -1,0 +1,30 @@
+[
+  {
+    "asset": "LTC",
+    "strategy_return": 231.3,
+    "buy_hold_return": -65.1,
+    "outperformance": 296.4,
+    "trades": 3
+  },
+  {
+    "asset": "ETH",
+    "strategy_return": 42.6,
+    "buy_hold_return": 117.2,
+    "outperformance": -74.7,
+    "trades": 5
+  },
+  {
+    "asset": "LINK",
+    "strategy_return": 220.1,
+    "buy_hold_return": -57.3,
+    "outperformance": 277.5,
+    "trades": 5
+  },
+  {
+    "asset": "BTC",
+    "strategy_return": 96.0,
+    "buy_hold_return": -27.8,
+    "outperformance": 123.8,
+    "trades": 7
+  }
+]

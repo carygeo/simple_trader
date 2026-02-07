@@ -32,11 +32,14 @@ A medium-term crossover strategy using 20-day and 50-day Simple Moving Averages.
 
 ### Backtest Results (1 Year, 3x Leverage)
 
-| Asset | Return | Trades | Max Drawdown |
-|-------|--------|--------|--------------|
-| **LTC** | **+231%** | 3 | ~58% |
-| **LINK** | **+221%** | 5 | ~70% |
-| ETH | +44% | 5 | ~40% |
+| Asset | Strategy | Buy & Hold | Outperformance | Trades |
+|-------|----------|------------|----------------|--------|
+| **LTC** | **+231%** | -65% | **+296%** 🏆 | 3 |
+| **LINK** | **+220%** | -57% | **+277%** 🏆 | 5 |
+| **BTC** | **+96%** | -28% | **+124%** | 4 |
+| ETH | +43% | +117% | -75% ⚠️ | 5 |
+
+**Key Insight:** Strategy massively outperforms on bearish assets because it can SHORT. ETH was bullish, so buy-and-hold would have been better.
 
 ### Why It Works
 1. **Daily candles** filter out intraday noise
